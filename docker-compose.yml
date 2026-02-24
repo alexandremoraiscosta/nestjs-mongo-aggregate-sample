@@ -1,13 +1,13 @@
 services:
-  mongo:
+  mongodb:
     image: mongo:7
-    container_name: mongo-dev
+    container_name: mongodb
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: nestmongo
     volumes:
-      - mongo_data:/data/db
+    - mongo_data:/data/db
 
 volumes:
   mongo_data:
