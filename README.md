@@ -32,7 +32,7 @@ docker compose up -d
 Visualizar logs:
 
 ``` bash
-docker compose logs -f mongo
+docker compose logs -f mongodb
 ```
 
 MongoDB disponível em:
