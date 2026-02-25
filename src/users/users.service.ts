@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
+import { AddOrderDto } from './dto/add-order.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,6 +24,18 @@ export class UsersService {
       email: dto.email,
       orders,
     });
+  }
+
+  async addOrder(userId: string, dto: AddOrderDto) {
+    const order = {
+      product: dto.product,
+      amount: dto.amount,
+      createdAt: new Date(dto.createdAt),
+    };
+
+    return this.userModel
+      .findByIdAndUpdate(userId, { $push: { orders: order } }, { new: true })
+      .exec();
   }
 
   async findAll() {
