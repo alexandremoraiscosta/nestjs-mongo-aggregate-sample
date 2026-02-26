@@ -92,6 +92,39 @@ export class UsersService {
     };
   }
 
+  async getTopProducts(userId: string, limit = 5) {
+    const _id = new Types.ObjectId(userId);
+
+    const result = await this.userModel
+      .aggregate([
+        { $match: { _id } },
+        { $unwind: '$orders' },
+
+        {
+          $group: {
+            _id: '$orders.product',
+            ordersCount: { $sum: 1 },
+            totalSpent: { $sum: '$orders.amount' },
+          },
+        },
+
+        { $sort: { totalSpent: -1 } },
+        { $limit: limit },
+
+        {
+          $project: {
+            _id: 0,
+            product: '$_id',
+            ordersCount: 1,
+            totalSpent: 1,
+          },
+        },
+      ])
+      .exec();
+
+    return result;
+  }
+
   async findAll() {
     return this.userModel.find().exec();
   }

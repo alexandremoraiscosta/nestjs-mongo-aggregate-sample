@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AddOrderDto } from './dto/add-order.dto';
+import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +29,15 @@ export class UsersController {
   }
 
   @Get(':id/summary')
-  getSummary(@Param('id') id: string) {
+  getSummary(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.getSummary(id);
+  }
+
+  @Get(':id/top-products')
+  getTopProducts(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+  ) {
+    return this.usersService.getTopProducts(id, limit);
   }
 }
