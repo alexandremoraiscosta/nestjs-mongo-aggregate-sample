@@ -26,4 +26,9 @@ export class UsersController {
   findById(@Param('id') id: string) {
     return this.usersService.findById(id);
   }
+
+  @Get(':id/summary')
+  getSummary(@Param('id') id: string) {
+    return this.usersService.getSummary(id);
+  }
 }
