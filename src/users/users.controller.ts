@@ -37,7 +37,9 @@ export class UsersController {
   getTopProducts(
     @Param('id', ParseObjectIdPipe) id: string,
     @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
   ) {
-    return this.usersService.getTopProducts(id, limit);
+    return this.usersService.getTopProducts(id, { limit, from, to });
   }
 }

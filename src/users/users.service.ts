@@ -92,37 +92,52 @@ export class UsersService {
     };
   }
 
-  async getTopProducts(userId: string, limit = 5) {
+  async getTopProducts(
+    userId: string,
+    opts: { limit?: number; from?: string; to?: string } = {},
+  ) {
     const _id = new Types.ObjectId(userId);
+    const limit = opts.limit ?? 5;
 
-    const result = await this.userModel
-      .aggregate([
-        { $match: { _id } },
-        { $unwind: '$orders' },
+    const fromDate = opts.from ? new Date(opts.from) : undefined;
+    const toDate = opts.to ? new Date(opts.to) : undefined;
 
-        {
-          $group: {
-            _id: '$orders.product',
-            ordersCount: { $sum: 1 },
-            totalSpent: { $sum: '$orders.amount' },
-          },
+    const dateMatch: any = {};
+    if (fromDate) dateMatch.$gte = fromDate;
+    if (toDate) dateMatch.$lte = toDate;
+
+    const pipeline: any[] = [
+      { $match: { _id } },
+      { $unwind: '$orders' },
+    ];
+
+    if (fromDate || toDate) {
+      pipeline.push({
+        $match: { 'orders.createdAt': dateMatch },
+      });
+    }
+
+    pipeline.push(
+      {
+        $group: {
+          _id: '$orders.product',
+          ordersCount: { $sum: 1 },
+          totalSpent: { $sum: '$orders.amount' },
         },
-
-        { $sort: { totalSpent: -1 } },
-        { $limit: limit },
-
-        {
-          $project: {
-            _id: 0,
-            product: '$_id',
-            ordersCount: 1,
-            totalSpent: 1,
-          },
+      },
+      { $sort: { totalSpent: -1 } },
+      { $limit: limit },
+      {
+        $project: {
+          _id: 0,
+          product: '$_id',
+          ordersCount: 1,
+          totalSpent: 1,
         },
-      ])
-      .exec();
+      },
+    );
 
-    return result;
+    return this.userModel.aggregate(pipeline).exec();
   }
 
   async findAll() {
