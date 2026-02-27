@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { AddOrderDto } from './dto/add-order.dto';
 import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
 
-@Controller('users')
+@Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
