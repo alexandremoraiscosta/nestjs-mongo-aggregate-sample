@@ -1,8 +1,9 @@
-import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AddOrderDto } from './dto/add-order.dto';
 import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
@@ -28,11 +29,13 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id/summary')
   getSummary(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.getSummary(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id/top-products')
   getTopProducts(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -42,4 +45,6 @@ export class UsersController {
   ) {
     return this.usersService.getTopProducts(id, { limit, from, to });
   }
+
+
 }
