@@ -4,6 +4,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { AddOrderDto } from './dto/add-order.dto';
 import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Role } from '../auth/enums/role.enum';
 
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
@@ -29,13 +32,15 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   @Get(':id/summary')
   getSummary(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.getSummary(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   @Get(':id/top-products')
   getTopProducts(
     @Param('id', ParseObjectIdPipe) id: string,
