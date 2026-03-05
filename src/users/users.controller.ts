@@ -2,8 +2,8 @@ import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Que
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AddOrderDto } from './dto/add-order.dto';
-import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ParseObjectIdPipe } from '../common/pipes/parse-objectid.pipe';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role } from '../auth/enums/role.enum';
