@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { AddOrderDto } from './dto/add-order.dto';
+import { SqsLikeEventsPublisher } from '../common/events/sqs-like-events.publisher';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    private readonly eventsPublisher: SqsLikeEventsPublisher,
   ) {}
 
   async create(dto: CreateUserDto) {
@@ -33,9 +35,30 @@ export class UsersService {
       createdAt: new Date(dto.createdAt),
     };
 
-    return this.userModel
-      .findByIdAndUpdate(userId, { $push: { orders: order } }, { new: true })
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $push: { orders: order } },
+        { returnDocument: 'after' },
+      )
       .exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.eventsPublisher.publish({
+      eventType: 'order.created',
+      occurredAt: new Date().toISOString(),
+      payload: {
+        userId,
+        product: dto.product,
+        amount: dto.amount,
+        createdAt: order.createdAt.toISOString(),
+      },
+    });
+
+    return updatedUser;
   }
 
   async getSummary(userId: string) {
